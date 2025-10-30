@@ -1,126 +1,175 @@
 """
-Data models for H.O.M.E. Platform
-Pydantic models for API validation and Firestore documents
+Client data models for H.O.M.E. Platform
+Represents homeless individuals in the system
 """
 
-from pydantic import BaseModel, Field, EmailStr
-from typing import Optional, List, Dict, Any
 from datetime import datetime
 from enum import Enum
+from typing import Optional, Dict, List
+from pydantic import BaseModel, Field, EmailStr
 
-# Enums
+
 class ClientStatus(str, Enum):
     """Client status in the system"""
-    INTAKE = "intake"
-    ASSESSMENT = "assessment"
-    HOUSING_SEARCH = "housing_search"
-    HOUSING_MATCHED = "housing_matched"
-    HOUSED = "housed"
-    INACTIVE = "inactive"
+    INTAKE = "intake"                    # Initial intake
+    ASSESSED = "assessed"                # VI-SPDAT complete
+    MATCHED = "matched"                  # Housing matched
+    PLACED = "placed"                    # Housing secured
+    FOLLOW_UP = "follow_up"              # Post-placement
+    INACTIVE = "inactive"                # No longer active
 
-class Gender(str, Enum):
-    """Gender options (HUD standard)"""
-    MALE = "male"
-    FEMALE = "female"
-    TRANSGENDER_MALE = "transgender_male"
-    TRANSGENDER_FEMALE = "transgender_female"
-    NON_BINARY = "non_binary"
-    QUESTIONING = "questioning"
-    OTHER = "other"
-    DECLINED = "declined"
 
-class Race(str, Enum):
-    """Race/ethnicity options (HUD standard)"""
-    AMERICAN_INDIAN = "american_indian"
-    ASIAN = "asian"
-    BLACK = "black"
-    NATIVE_HAWAIIAN = "native_hawaiian"
-    WHITE = "white"
-    MULTIPLE = "multiple"
-    DECLINED = "declined"
-
-class HousingStatus(str, Enum):
-    """Current housing status (HUD standard)"""
-    UNSHELTERED = "unsheltered"
+class HousingType(str, Enum):
+    """Types of housing programs"""
     EMERGENCY_SHELTER = "emergency_shelter"
-    TRANSITIONAL_HOUSING = "transitional_housing"
-    TEMPORARY_WITH_FAMILY = "temporary_with_family"
-    TEMPORARY_WITH_FRIENDS = "temporary_with_friends"
-    HOTEL = "hotel"
-    INSTITUTION = "institution"
+    TRANSITIONAL = "transitional"
+    RAPID_REHOUSING = "rapid_rehousing"
+    PERMANENT_SUPPORTIVE = "permanent_supportive"
     OTHER = "other"
 
-# Base Models
+
 class ClientBase(BaseModel):
     """Base client information"""
     first_name: str = Field(..., min_length=1, max_length=100)
     last_name: str = Field(..., min_length=1, max_length=100)
-    middle_name: Optional[str] = Field(None, max_length=100)
-    phone: Optional[str] = Field(None, pattern=r'^\+?1?\d{10,15}$')
+    middle_name: Optional[str] = None
+    preferred_name: Optional[str] = None
+    
+    # Contact
+    phone: Optional[str] = None
     email: Optional[EmailStr] = None
-    date_of_birth: Optional[str] = None  # YYYY-MM-DD format
-    gender: Optional[Gender] = None
-    race: Optional[Race] = None
-    hispanic: Optional[bool] = None
-    veteran: Optional[bool] = None
+    preferred_contact: str = "phone"  # phone, email, sms
+    
+    # Demographics (HUD required)
+    date_of_birth: Optional[datetime] = None
+    gender: Optional[str] = None
+    race: Optional[List[str]] = None
+    ethnicity: Optional[str] = None
+    veteran_status: Optional[bool] = None
+    
+    # Language
+    primary_language: str = "english"
+    needs_interpreter: bool = False
 
-class IntakeAssessment(BaseModel):
-    """40 HUD questions - simplified for Phase 0"""
-    # Basic Demographics (already in ClientBase)
+
+class IntakeData(BaseModel):
+    """40 HUD assessment questions"""
+    # This will be populated with actual VI-SPDAT questions
+    # For Phase 0, simplified version
     
-    # Housing History
-    current_status: HousingStatus
-    nights_homeless: Optional[int] = Field(None, ge=0)
-    months_homeless: Optional[int] = Field(None, ge=0)
-    times_homeless_past_3_years: Optional[int] = Field(None, ge=0)
+    # Housing situation
+    currently_homeless: bool
+    nights_homeless_past_3_years: Optional[int] = None
+    living_situation: Optional[str] = None
     
-    # Barriers (VI-SPDAT components)
-    health_issues: bool = False
-    mental_health_issues: bool = False
+    # Health
+    chronic_health: bool = False
     substance_use: bool = False
-    medication_needs: bool = False
-    physical_disability: bool = False
-    developmental_disability: bool = False
+    mental_health: bool = False
     
-    # Safety & Risk
-    fleeing_violence: bool = False
-    legal_issues: bool = False
+    # History
+    history_foster_care: bool = False
+    history_incarceration: bool = False
+    history_victimization: bool = False
     
-    # Income & Support
+    # Resources
     has_income: bool = False
-    income_amount: Optional[float] = Field(None, ge=0)
-    has_benefits: bool = False
-    has_identification: bool = False
+    income_source: Optional[str] = None
+    monthly_income: Optional[float] = None
+    has_id: bool = False
+    has_social_security_card: bool = False
     
-    # Additional Info
-    notes: Optional[str] = Field(None, max_length=2000)
+    # Support
+    has_family_support: bool = False
+    has_friends_support: bool = False
+    
+    # Barriers
+    transportation_barriers: bool = False
+    childcare_barriers: bool = False
+    employment_barriers: bool = False
+    
+    # Additional notes
+    additional_info: Optional[str] = None
+
+
+class VISPDATScore(BaseModel):
+    """VI-SPDAT vulnerability assessment score"""
+    total_score: int = Field(..., ge=0, le=17)  # 0-17 scale
+    housing_history_score: int = Field(..., ge=0)
+    wellness_score: int = Field(..., ge=0)
+    risk_score: int = Field(..., ge=0)
+    
+    # Recommendation based on score
+    # 0-3: Low acuity
+    # 4-7: Medium acuity
+    # 8+: High acuity
+    acuity_level: str  # low, medium, high
+    recommended_housing_type: HousingType
+    
+    calculated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ClientCreate(ClientBase):
+    """Data needed to create a new client"""
+    qr_code: str  # QR code scanned for intake
+    intake_data: IntakeData
+
+
+class ClientUpdate(BaseModel):
+    """Data that can be updated"""
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone: Optional[str] = None
+    email: Optional[EmailStr] = None
+    status: Optional[ClientStatus] = None
+    notes: Optional[str] = None
+
 
 class Client(ClientBase):
     """Full client record"""
-    id: str
+    id: str  # Firestore document ID
     status: ClientStatus = ClientStatus.INTAKE
-    intake_assessment: Optional[IntakeAssessment] = None
-    vi_spdat_score: Optional[int] = Field(None, ge=0, le=17)
     
-    # Assignment
+    # Intake info
+    intake_completed_at: Optional[datetime] = None
+    qr_code: str
+    organization_id: str
     assigned_caseworker_id: Optional[str] = None
-    assigned_organization_id: Optional[str] = None
-    qr_code_used: Optional[str] = None
     
-    # Timestamps
-    created_at: datetime
-    updated_at: datetime
+    # Assessment
+    intake_data: Optional[IntakeData] = None
+    vi_spdat_score: Optional[VISPDATScore] = None
+    
+    # Housing
+    matched_housing_id: Optional[str] = None
+    housing_placed_at: Optional[datetime] = None
+    
+    # Metadata
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Notes
+    notes: List[str] = []
     
     class Config:
-        json_schema_extra = {
-            "example": {
-                "id": "client_abc123",
-                "first_name": "John",
-                "last_name": "Doe",
-                "phone": "+15555551234",
-                "status": "intake",
-                "vi_spdat_score": 8,
-                "created_at": "2025-10-29T10:00:00Z",
-                "updated_at": "2025-10-29T10:00:00Z"
-            }
-        }
+        from_attributes = True
+
+
+class ClientListResponse(BaseModel):
+    """Paginated list of clients"""
+    clients: List[Client]
+    total: int
+    page: int = 1
+    page_size: int = 20
+    has_more: bool
+
+
+class ClientActionItem(BaseModel):
+    """Action item for caseworker queue"""
+    client_id: str
+    client_name: str
+    action_type: str  # "initial_contact", "follow_up", "document_needed", etc.
+    priority: int  # 1-5, 5 being highest
+    due_date: Optional[datetime] = None
+    description: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
