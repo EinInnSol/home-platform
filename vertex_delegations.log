@@ -1,0 +1,29 @@
+[2025-10-31 17:32:26] [OK] Connected to Vertex AI
+[2025-10-31 17:32:26] 
+[ROBOT] Delegating: WelcomeScreen
+[2025-10-31 17:32:26]    Specs: Mobile-first welcome screen for H.O.M.E. platform. Shows logo, welcome message, brief description, a...
+[2025-10-31 17:32:31] [ERROR] Generation failed: Error code: 404 - {'error': {'code': 404, 'message': 'Publisher Model `projects/einharjer-valhalla/locations/us-east5/publishers/anthropic/models/claude-sonnet-4-20250514` not found.', 'status': 'NOT_FOUND'}}
+[2025-11-01 18:13:06] [OK] Connected to Vertex AI
+[2025-11-01 18:13:06] 
+[ROBOT] Delegating: SectionA_HousingHistory
+[2025-11-01 18:13:06]    Specs: 
+Create a React component for VI-SPDAT Section A: Housing History
+
+This section has 3 questions from...
+[2025-11-01 18:13:10] [ERROR] Generation failed: Error code: 404 - {'error': {'code': 404, 'message': 'Publisher Model `projects/einharjer-valhalla/locations/us-east5/publishers/anthropic/models/claude-3-5-sonnet-20241022` not found.', 'status': 'NOT_FOUND'}}
+[2025-11-01 18:13:53] [OK] Connected to Vertex AI
+[2025-11-01 18:13:53] 
+[ROBOT] Delegating: SectionA_HousingHistory
+[2025-11-01 18:13:53]    Specs: 
+Create a React component for VI-SPDAT Section A: Housing History
+
+This section has 3 questions from...
+[2025-11-01 18:13:56] [ERROR] Generation failed: Error code: 404 - {'error': {'code': 404, 'message': 'Publisher Model `projects/einharjer-valhalla/locations/us-east5/publishers/anthropic/models/claude-3-5-sonnet-v2@20241022` was not found or your project does not have access to it. Please ensure you are using a valid model version. For more information, see: https://cloud.google.com/vertex-ai/generative-ai/docs/learn/model-versions', 'status': 'NOT_FOUND'}}
+[2025-11-01 18:14:55] [OK] Connected to Vertex AI
+[2025-11-01 18:14:55] 
+[ROBOT] Delegating: SectionA_HousingHistory
+[2025-11-01 18:14:55]    Specs: 
+Create a React component for VI-SPDAT Section A: Housing History
+
+This section has 3 questions from...
+[2025-11-01 18:14:58] [ERROR] Generation failed: Error code: 404 - {'error': {'code': 404, 'message': 'Publisher Model `projects/einharjer-valhalla/locations/us-east5/publishers/anthropic/models/claude-sonnet-4-20250514` not found.', 'status': 'NOT_FOUND'}}
