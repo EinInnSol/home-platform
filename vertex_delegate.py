@@ -20,7 +20,7 @@ class VertexDelegate:
     def __init__(self, project_root="C:\\Users\\james\\Projects\\Active\\home-platform"):
         self.project_id = "einharjer-valhalla"
         self.region = "us-east5"
-        self.api_key = "AQ.Ab8RN6KYsm18q1hXK5AAok5sdkza_nfuyrzslLL33ChHFxtPqw"
+        self.api_key = os.getenv('VERTEX_AI_API_KEY', '')  # Load from environment variable
         self.client = None
         self.project_root = Path(project_root)
         self.log_file = self.project_root / "vertex_delegations.log"
